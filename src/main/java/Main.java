@@ -1,70 +1,108 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
 
-        int m = scanner.nextInt();
-        int n = scanner.nextInt();
+        int m = sc.nextInt();
+        int n = sc.nextInt();
 
-        String[] corretoraA = new String[m];
-        String[] corretoraB = new String[n];
+        String[] a = new String[m];
+        String[] b = new String[n];
 
         for (int i = 0; i < m; i++) {
-            corretoraA[i] = scanner.next();
+            a[i] = sc.next();
         }
 
         for (int i = 0; i < n; i++) {
-            corretoraB[i] = scanner.next();
+            b[i] = sc.next();
         }
 
-        List<String> consenso = encontrarConsenso(corretoraA, corretoraB, 0, 0);
-        System.out.println(consenso.size());
+        ArrayList<Integer> posicoes = new ArrayList<>();
+        ArrayList<String> ativos = new ArrayList<>();
 
-        if (consenso.isEmpty()) {
-            System.out.println();
-        } else {
-            for (int i = 0; i < consenso.size(); i++) {
-                if (i > 0) {
-                    System.out.print(" ");
+        for (int i = 0; i < m; i++) {
+
+            for (int j = n - 1; j >= 0; j--) {
+
+                if (a[i].equals(b[j])) {
+                    posicoes.add(j);
+                    ativos.add(a[i]);
                 }
+            }
+        }
 
-                System.out.print(consenso.get(i));
+        if (posicoes.isEmpty()) {
+            System.out.println(0);
+            System.out.println();
+            sc.close();
+            return;
+        }
+
+        int quantidade = posicoes.size();
+
+        int[] fim = new int[quantidade];
+        int[] indice = new int[quantidade];
+        int[] anterior = new int[quantidade];
+
+        Arrays.fill(anterior, -1);
+
+        int tamanho = 0;
+
+        for (int i = 0; i < quantidade; i++) {
+
+            int esquerda = 0;
+            int direita = tamanho;
+
+            while (esquerda < direita) {
+
+                int meio = (esquerda + direita) / 2;
+
+                if (fim[meio] < posicoes.get(i)) {
+                    esquerda = meio + 1;
+                } else {
+                    direita = meio;
+                }
             }
 
-            System.out.println();
+            fim[esquerda] = posicoes.get(i);
+            indice[esquerda] = i;
+
+            if (esquerda > 0) {
+                anterior[i] = indice[esquerda - 1];
+            }
+
+            if (esquerda == tamanho) {
+                tamanho++;
+            }
         }
 
-        scanner.close();
-    }
+        ArrayList<String> resposta = new ArrayList<>();
 
-    private static List<String> encontrarConsenso(String[] a, String[] b, int i, int j) {
+        int atual = indice[tamanho - 1];
 
-        if (i == a.length || j == b.length) {
-            return new ArrayList<>();
+        while (atual != -1) {
+            resposta.add(ativos.get(atual));
+            atual = anterior[atual];
         }
 
-        if (a[i].equals(b[j])) {
+        Collections.reverse(resposta);
 
-            List<String> resultado = encontrarConsenso(a, b, i + 1, j + 1);
+        System.out.println(resposta.size());
 
-            resultado.add(0, a[i]);
+        for (int i = 0; i < resposta.size(); i++) {
 
-            return resultado;
+            if (i > 0) {
+                System.out.print(" ");
+            }
+
+            System.out.print(resposta.get(i));
         }
 
-        List<String> ignorandoA = encontrarConsenso(a, b, i + 1, j);
+        System.out.println();
 
-        List<String> ignorandoB = encontrarConsenso(a, b, i, j + 1);
-
-        if (ignorandoA.size() >= ignorandoB.size()) {
-            return ignorandoA;
-        }
-
-        return ignorandoB;
+        sc.close();
     }
 }
